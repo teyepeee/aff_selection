@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "pm2 start . --attach --name levanter",
-    "docker": "pm2-runtime start . --name levanter",
-    "stop": "pm2 stop levanter",
+    "start": "pm2 start . --attach --name aff_selection",
+    "docker": "pm2-runtime start . --name aff_selection",
+    "stop": "pm2 stop aff_selection",
     "postinstall": "node -e \"try { require('sharp') } catch (e) { process.exit(1); }\" || yarn add --ignore-engines sharp@0.33.5"
   },
   "author": "",
