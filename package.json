@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "pm2-runtime start . --name aff_selection",
-    "dev": "pm2 start . --name aff_selection --attach",
-    "stop": "pm2 stop aff_selection",
+    "start": "node .",
+    "dev": "node .",
+    "stop": "echo \"Use Koyeb scaling/stop instead\"",
     "postinstall": "node -e \"try { require('sharp') } catch (e) { process.exit(1); }\" || yarn add --ignore-engines sharp@0.33.5"
   },
   "author": "",
@@ -36,7 +36,6 @@
     "pdfkit": "^0.13.0",
     "pg": "^8.7.3",
     "pino-pretty": "^9.1.1",
-    "pm2": "^6.0.8",
     "qrcode-reader": "^1.0.4",
     "qrcode-terminal": "^0.12.0",
     "sequelize": "^6.21.4",
