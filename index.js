@@ -1,5 +1,6 @@
 const { Client, logger } = require('./lib/client')
 const { DATABASE, VERSION } = require('./config')
+const { stopInstance } = require('./lib/pm2')
 const http = require('http')
 
 const PORT = process.env.PORT || 8000
@@ -12,25 +13,23 @@ const start = async () => {
   logger.info(`levanter ${VERSION}`)
   try {
     await DATABASE.authenticate({ retry: { max: 3 } })
-    logger.info('Database connection established')
   } catch (error) {
     const databaseUrl = process.env.DATABASE_URL
     logger.error({ msg: 'Unable to connect to the database', error: error.message, databaseUrl })
-    return process.exit(1)
+    return stopInstance()
   }
 
   try {
     bot = new Client()
     await bot.connect()
     ready = true
-    logger.info('Bot connected successfully')
+    logger.info('Bot connected; health is ready')
   } catch (error) {
     logger.error(error)
-    process.exit(1)
   }
 }
 
-// Minimal HTTP health server for Koyeb
+// Minimal HTTP health server
 server = http.createServer((req, res) => {
   if (req.url === '/healthz') {
     const status = ready ? 200 : 503
@@ -43,17 +42,14 @@ server = http.createServer((req, res) => {
 
 server.listen(PORT, () => logger.info(`Health server listening on :${PORT}`))
 
-// Graceful shutdown
 const shutdown = async (signal) => {
   try {
     logger.info(`${signal} received: shutting down`)
     ready = false
-
     if (server) {
       await new Promise((resolve) => server.close(resolve))
       logger.info('HTTP server closed')
     }
-
     if (bot && typeof bot.disconnect === 'function') {
       try {
         await bot.disconnect()
@@ -62,7 +58,6 @@ const shutdown = async (signal) => {
         logger.warn({ msg: 'Bot disconnect failed', error: e?.message })
       }
     }
-
     if (DATABASE && typeof DATABASE.close === 'function') {
       try {
         await DATABASE.close()
@@ -74,7 +69,7 @@ const shutdown = async (signal) => {
   } catch (e) {
     logger.error({ msg: 'Error during shutdown', error: e?.message })
   } finally {
-    process.exit(0)
+    stopInstance()
   }
 }
 
